@@ -23,6 +23,25 @@ www.video.com
 
 # List of Projects
 
+# Electromagnetic Suspension
+
+## Summary:
+There are different types of shock absorbers available today which absorbs shock like hydraulic shock absorbers (credits to BMW), mechanical shock absorbers, magnetic shock absorbers in which magnetic shock absorbers is the one which is grabbing all attention due to its unique structure and capability to take high loads.
+
+Two powerful Neodymium magnets or electromagnets can be used in the shock absorber. One magnet fixed to the moving shaft and another magnet is fixed to the stationary shaft. Complete set-up is enclosed in a barrel casing as shown in the image. Like poles of both magnet 1 and magnet 2 are facing each other i.e. (North Pole - North Pole / South Pole – South Pole).
+
+Whenever there is an upward movement in moving shaft, both magnet 1 and magnet 2 comes close to each other, as the like poles are in action a repulsion force is created between the magnets which gives resistance to the further upward movement of the moving shaft and the movable shaft is pushed to the original position.
+
+Magnetic shock absorbers have their own advantage over hydraulic shock absorbers which are commonly used today. It is clear that hydraulic shock absorbers have limited load damping capability, the fluid in the shock absorber are prone to leakage, no friction, elimination of hysteresis effects due to the conductive medium, flexibility of design.
+
+## Source Link:
+Idea Origin: https://www.skyfilabs.com/project-ideas/electromagnetic-shock-absorber
+
+## Video Link:
+Bose: https://www.youtube.com/watch?v=3KPYIaks1UY
+
+Hand-Made Car: https://www.youtube.com/watch?v=JJijn7EKToc
+
 # Metal Detector
 ## Summary: 
 
@@ -43,6 +62,3 @@ Measuring the effectiveness a project based class for electromagnetics is not an
 
 ## Source Link: 
 https://www.asee.org/public/conferences/64/papers/16311/view
-
-## Video  Link: 
-www.video.com
