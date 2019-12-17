@@ -1,65 +1,109 @@
-/*
-*  L298P Motor Shield
-*  Code for exercising the L298P Motor Control portion of the shield
-*  The low level motor control logic is kept in the function 'Motor'
-*/
-// The following pin designations are fixed by the shield
+// PINS
 //  Motor A
-int const ENA = 10;  
-int const INA = 12;
+int const ENA = 9;
+int const IN1 = 8;
+int const IN2 = 7;
 //  Motor B
-int const ENB = 11;  
-int const INB = 13;
+int const ENB = 3;
+int const IN3 = 5;
+int const IN4 = 4;
 
+// CONSTANTS
 int const MIN_SPEED = 27;   // Set to minimum PWM value that will make motors turn
 int const ACCEL_DELAY = 50; // delay between steps when ramping motor speed up or down.
+int const inc_dec_amount = 2;
 
+// VARIABLES
 char bluetooth;
+char curr_direction_right;
+char curr_direction_left;
+int curr_speed_right;
+int curr_speed_left;
+
 //===============================================================================
 //  Initialization
 //===============================================================================
 void setup()
 {
-  pinMode(ENA, OUTPUT);   // set all the motor control pins to outputs
+  pinMode(ENA, OUTPUT); // set all the motor control pins to outputs
   pinMode(ENB, OUTPUT);
-  pinMode(INA, OUTPUT);
-  pinMode(INB, OUTPUT);
-  pinMode(BUZZER, OUTPUT);
-  Serial.begin(9600);     // Set comm speed for serial monitor messages
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+
+  // Turn off motors - Initial state
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, LOW);
+
+  // Default selections
+  curr_direction_right = 'F'; // forward
+  curr_direction_left = 'F';  // forward
+  curr_speed_right = 0;       // stop
+  curr_speed_left = 0;        // stop
+
+  Serial.begin(9600); // Set comm speed for serial monitor messages and bluetooth
 }
 //===============================================================================
 //  Main
 //===============================================================================
 void loop()
 {
-  if(Serial.available()){
+  Serial.println(bluetooth);
+  if (Serial.available())
+  {
     bluetooth = Serial.read();
     Serial.println(bluetooth);
   }
-  
-  if (bluetooth == 'F') {
-    Motor('C', 'F', 100);   
+
+  switch (bluetooth)
+  {
+  case 'F':
+    // set preference using bluetooth input
+    setDirAndSpeed('F', curr_direction_right, curr_speed_right);
+    setDirAndSpeed('F', curr_direction_left, curr_speed_left);
+    break;
+  case 'B':
+    // set preference using bluetooth input
+    setDirAndSpeed('B', curr_direction_right, curr_speed_right);
+    setDirAndSpeed('B', curr_direction_left, curr_speed_left);
+    break;
+
+  // forward-right & back-right respectively
+  case 'I':
+    setDirAndSpeed('F', curr_direction_right, curr_speed_right);
+    break;
+  case 'J':
+    setDirAndSpeed('B', curr_direction_right, curr_speed_right);
+    break;
+
+  // forward-left & back-left respectively
+  case 'G':
+    setDirAndSpeed('F', curr_direction_left, curr_speed_left);
+  case 'H':
+    setDirAndSpeed('B', curr_direction_left, curr_speed_left);
+    break;
+
+  // stop
+  case 'X':
+  case 'W':
+  case 'w':
+    curr_direction_right = 'F'; // forward
+    curr_speed_right = 0;       // stop
+    curr_direction_left = 'F';  // forward
+    curr_speed_left = 0;        // stop
+    break;
   }
 
-  else if (bluetooth == 'B') {
-    Motor('C', 'R', 100);   
-  }
-
-  else if (bluetooth == 'R') {
-    Motor('A', 'F', 100);   
-  }
-  
-  else if (bluetooth == 'L') {
-    Motor('B', 'F', 100);   
-  }
-
-  else if (bluetooth == 'W') {
-    Motor('C', 'F', 0);   
-  }
-
-  else if (bluetooth == 'S') {
-    Motor('C', 'F', 0);   
-  }
+  // apply selected state
+  Motor('A', curr_direction_right, curr_speed_right);
+  Motor('B', curr_direction_left, curr_speed_left);
+  Serial.println(curr_direction_right);
+  Serial.println(curr_direction_left);
+  Serial.println(curr_speed_right);
+  Serial.println(curr_speed_left);
   delay(10);
 }
 /*
@@ -75,42 +119,101 @@ void Motor(char mot, char dir, int speed)
   // remap the speed from range 0-100 to 0-255
   int newspeed;
   if (speed == 0)
-    newspeed = 0;   // Don't remap zero, but remap everything else.
+    newspeed = 0; // Don't remap zero, but remap everything else.
   else
     newspeed = map(speed, 1, 100, MIN_SPEED, 255);
 
-  switch (mot) {
-    case 'A':   // Controlling Motor A
-      if (dir == 'F') {
-        digitalWrite(INA, HIGH);
-      }
-      else if (dir == 'R') {
-        digitalWrite(INB, LOW);
-      }
-      analogWrite(ENA, newspeed);
-      break;
+  switch (mot)
+  {
+  case 'A': // Controlling Motor A
+    if (dir == 'F')
+    {
+      digitalWrite(IN1, HIGH);
+      digitalWrite(IN2, LOW);
+    }
+    else if (dir == 'R')
+    {
+      digitalWrite(IN1, LOW);
+      digitalWrite(IN2, HIGH);
+    }
+    analogWrite(ENA, newspeed);
+    break;
 
-    case 'B':   // Controlling Motor B
-      if (dir == 'F') {
-        digitalWrite(INB, HIGH);
-      }
-      else if (dir == 'R') {
-        digitalWrite(INB, LOW);
-      }
-      analogWrite(ENB, newspeed);
-      break;
+  case 'B': // Controlling Motor B
+    if (dir == 'F')
+    {
+      digitalWrite(IN3, HIGH);
+      digitalWrite(IN4, LOW);
+    }
+    else if (dir == 'R')
+    {
+      digitalWrite(IN3, LOW);
+      digitalWrite(IN4, HIGH);
+    }
+    analogWrite(ENB, newspeed);
+    break;
 
-    case 'C':  // Controlling Both Motors
-      if (dir == 'F') {
-        digitalWrite(INA, HIGH);
-        digitalWrite(INB, HIGH);
-      }
-      else if (dir == 'R') {
-        digitalWrite(INA, LOW);
-         digitalWrite(INB, LOW);
-      }
-      analogWrite(ENA, newspeed);
-      analogWrite(ENB, newspeed);
-      break;
+  case 'C': // Controlling Both Motors
+    if (dir == 'F')
+    {
+      digitalWrite(IN1, HIGH);
+      digitalWrite(IN2, LOW);
+      digitalWrite(IN3, HIGH);
+      digitalWrite(IN4, LOW);
+    }
+    else if (dir == 'R')
+    {
+      digitalWrite(IN1, LOW);
+      digitalWrite(IN2, HIGH);
+      digitalWrite(IN3, LOW);
+      digitalWrite(IN4, HIGH);
+    }
+    analogWrite(ENA, newspeed);
+    analogWrite(ENB, newspeed);
+    break;
+  }
+}
+
+void setDirAndSpeed(char requested_dir, char &curr_direction, int &curr_speed)
+{
+  switch (requested_dir)
+  {
+  case 'F':
+    if (curr_direction == 'F' && 100 - inc_dec_amount < curr_speed)
+      curr_speed = 100;
+
+    else if (curr_direction == 'F' && 0 <= curr_speed)
+      curr_speed += inc_dec_amount;
+
+    else if (curr_direction == 'R' && curr_speed <= MIN_SPEED + inc_dec_amount)
+    {
+      curr_direction = 'F'; // forward
+      curr_speed = 0;
+    }
+
+    else
+      curr_speed -= inc_dec_amount;
+    break;
+
+  case 'B':
+    if (curr_direction == 'R' && 100 - inc_dec_amount < curr_speed)
+      curr_speed = 100;
+
+    else if (curr_direction == 'R' && 0 <= curr_speed)
+      curr_speed += inc_dec_amount;
+
+    else if (curr_direction == 'F' && curr_speed <= MIN_SPEED + inc_dec_amount)
+    {
+      curr_direction = 'R'; // forward
+      curr_speed = 0;
+    }
+
+    else
+      curr_speed -= inc_dec_amount;
+    break;
+
+  default:
+    // preserve current state
+    break;
   }
 }
