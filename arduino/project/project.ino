@@ -16,7 +16,7 @@ int const IN3 = 5;
 int const IN4 = 4;
 
 // CONSTANTS
-int const MIN_SPEED = 27;   // Set to minimum PWM value that will make motors turn
+int const MIN_SPEED = 10;   // Set to minimum PWM value that will make motors turn
 int const ACCEL_DELAY = 50; // delay between steps when ramping motor speed up or down.
 int const inc_dec_amount = 2;
 
@@ -155,6 +155,7 @@ void loop()
     // forward-left & back-left respectively
     case 'G':
       setDirAndSpeed('F', susp_curr_direction_left, susp_curr_speed_left);
+      break;
     case 'H':
       setDirAndSpeed('B', susp_curr_direction_left, susp_curr_speed_left);
       break;
