@@ -1,10 +1,17 @@
 // PINS
-//  Motor A
-int const ENA = 9;
+//  Motor A for Wheels
+int const ENA_WHEEL = 10;
+int const INA_WHEEL = 12;
+//  Motor B for Wheels
+int const ENB_WHEEL = 11;
+int const INB_WHEEL = 13;
+
+//  Motor A for Suspension
+int const ENA_SUSP = 9;
 int const IN1 = 8;
 int const IN2 = 7;
-//  Motor B
-int const ENB = 3;
+//  Motor B for Suspension
+int const ENB_SUSP = 3;
 int const IN3 = 5;
 int const IN4 = 4;
 
@@ -15,34 +22,57 @@ int const inc_dec_amount = 2;
 
 // VARIABLES
 char bluetooth;
-char curr_direction_right;
-char curr_direction_left;
-int curr_speed_right;
-int curr_speed_left;
+bool suspension_mode;
+// Suspension
+char susp_curr_direction_right;
+char susp_curr_direction_left;
+int susp_curr_speed_right;
+int susp_curr_speed_left;
+// Wheels
+char wheel_curr_direction_right;
+char wheel_curr_direction_left;
+int wheel_curr_speed_right;
+int wheel_curr_speed_left;
 
 //===============================================================================
 //  Initialization
 //===============================================================================
 void setup()
 {
-  pinMode(ENA, OUTPUT); // set all the motor control pins to outputs
-  pinMode(ENB, OUTPUT);
+  // Wheels
+  pinMode(ENA_WHEEL, OUTPUT);
+  pinMode(ENB_WHEEL, OUTPUT);
+  pinMode(INA_WHEEL, OUTPUT);
+  pinMode(INB_WHEEL, OUTPUT);
+
+  // Suspension
+  pinMode(ENA_SUSP, OUTPUT); // set all the motor control pins to outputs
+  pinMode(ENB_SUSP, OUTPUT);
   pinMode(IN1, OUTPUT);
   pinMode(IN2, OUTPUT);
   pinMode(IN3, OUTPUT);
   pinMode(IN4, OUTPUT);
 
   // Turn off motors - Initial state
+  digitalWrite(INA_WHEEL, LOW);
+  digitalWrite(INB_WHEEL, LOW);
   digitalWrite(IN1, LOW);
   digitalWrite(IN2, LOW);
   digitalWrite(IN3, LOW);
   digitalWrite(IN4, LOW);
 
-  // Default selections
-  curr_direction_right = 'F'; // forward
-  curr_direction_left = 'F';  // forward
-  curr_speed_right = 0;       // stop
-  curr_speed_left = 0;        // stop
+  // Default selections for Suspension
+  suspension_mode = false;
+  susp_curr_direction_right = 'F'; // forward
+  susp_curr_direction_left = 'F';  // forward
+  susp_curr_speed_right = 0;       // stop
+  susp_curr_speed_left = 0;        // stop
+
+  // Default selections for Suspension
+  wheel_curr_direction_right = 'F'; // forward
+  wheel_curr_direction_left = 'F';  // forward
+  wheel_curr_speed_right = 0;       // stop
+  wheel_curr_speed_left = 0;        // stop
 
   Serial.begin(9600); // Set comm speed for serial monitor messages and bluetooth
 }
@@ -62,48 +92,48 @@ void loop()
   {
   case 'F':
     // set preference using bluetooth input
-    setDirAndSpeed('F', curr_direction_right, curr_speed_right);
-    setDirAndSpeed('F', curr_direction_left, curr_speed_left);
+    setDirAndSpeed('F', susp_curr_direction_right, susp_curr_speed_right);
+    setDirAndSpeed('F', susp_curr_direction_left, susp_curr_speed_left);
     break;
   case 'B':
     // set preference using bluetooth input
-    setDirAndSpeed('B', curr_direction_right, curr_speed_right);
-    setDirAndSpeed('B', curr_direction_left, curr_speed_left);
+    setDirAndSpeed('B', susp_curr_direction_right, susp_curr_speed_right);
+    setDirAndSpeed('B', susp_curr_direction_left, susp_curr_speed_left);
     break;
 
   // forward-right & back-right respectively
   case 'I':
-    setDirAndSpeed('F', curr_direction_right, curr_speed_right);
+    setDirAndSpeed('F', susp_curr_direction_right, susp_curr_speed_right);
     break;
   case 'J':
-    setDirAndSpeed('B', curr_direction_right, curr_speed_right);
+    setDirAndSpeed('B', susp_curr_direction_right, susp_curr_speed_right);
     break;
 
   // forward-left & back-left respectively
   case 'G':
-    setDirAndSpeed('F', curr_direction_left, curr_speed_left);
+    setDirAndSpeed('F', susp_curr_direction_left, susp_curr_speed_left);
   case 'H':
-    setDirAndSpeed('B', curr_direction_left, curr_speed_left);
+    setDirAndSpeed('B', susp_curr_direction_left, susp_curr_speed_left);
     break;
 
   // stop
   case 'X':
   case 'W':
   case 'w':
-    curr_direction_right = 'F'; // forward
-    curr_speed_right = 0;       // stop
-    curr_direction_left = 'F';  // forward
-    curr_speed_left = 0;        // stop
+    susp_curr_direction_right = 'F'; // forward
+    susp_curr_speed_right = 0;       // stop
+    susp_curr_direction_left = 'F';  // forward
+    susp_curr_speed_left = 0;        // stop
     break;
   }
 
   // apply selected state
-  Motor('A', curr_direction_right, curr_speed_right);
-  Motor('B', curr_direction_left, curr_speed_left);
-  Serial.println(curr_direction_right);
-  Serial.println(curr_direction_left);
-  Serial.println(curr_speed_right);
-  Serial.println(curr_speed_left);
+  // DriverMotor('A', susp_curr_direction_right, susp_curr_speed_right);
+  // DriverMotor('B', susp_curr_direction_left, susp_curr_speed_left);
+  DriverMotor('A', 'F', 50);
+  DriverMotor('B', 'F', 50);
+  ShieldMotor('A', 'F', 50);
+  ShieldMotor('B', 'F', 50);
   delay(10);
 }
 /*
@@ -114,7 +144,7 @@ void loop()
  * Mapping ignores speed values that are too low to make the motor turn.
  * In this case, anything below 27, but 0 still means 0 to stop the motors.
  */
-void Motor(char mot, char dir, int speed)
+void DriverMotor(char mot, char dir, int speed)
 {
   // remap the speed from range 0-100 to 0-255
   int newspeed;
@@ -136,7 +166,7 @@ void Motor(char mot, char dir, int speed)
       digitalWrite(IN1, LOW);
       digitalWrite(IN2, HIGH);
     }
-    analogWrite(ENA, newspeed);
+    analogWrite(ENA_SUSP, newspeed);
     break;
 
   case 'B': // Controlling Motor B
@@ -150,7 +180,7 @@ void Motor(char mot, char dir, int speed)
       digitalWrite(IN3, LOW);
       digitalWrite(IN4, HIGH);
     }
-    analogWrite(ENB, newspeed);
+    analogWrite(ENB_SUSP, newspeed);
     break;
 
   case 'C': // Controlling Both Motors
@@ -168,8 +198,60 @@ void Motor(char mot, char dir, int speed)
       digitalWrite(IN3, LOW);
       digitalWrite(IN4, HIGH);
     }
-    analogWrite(ENA, newspeed);
-    analogWrite(ENB, newspeed);
+    analogWrite(ENA_SUSP, newspeed);
+    analogWrite(ENB_SUSP, newspeed);
+    break;
+  }
+}
+
+void ShieldMotor(char mot, char dir, int speed)
+{
+  // remap the speed from range 0-100 to 0-255
+  int newspeed;
+  if (speed == 0)
+    newspeed = 0; // Don't remap zero, but remap everything else.
+  else
+    newspeed = map(speed, 1, 100, MIN_SPEED, 255);
+
+  switch (mot)
+  {
+  case 'A': // Controlling Motor A
+    if (dir == 'F')
+    {
+      digitalWrite(INA_WHEEL, HIGH);
+    }
+    else if (dir == 'R')
+    {
+      digitalWrite(INB_WHEEL, LOW);
+    }
+    analogWrite(ENA_WHEEL, newspeed);
+    break;
+
+  case 'B': // Controlling Motor B
+    if (dir == 'F')
+    {
+      digitalWrite(INB_WHEEL, HIGH);
+    }
+    else if (dir == 'R')
+    {
+      digitalWrite(INA_WHEEL, LOW);
+    }
+    analogWrite(ENB_WHEEL, newspeed);
+    break;
+
+  case 'C': // Controlling Both Motors
+    if (dir == 'F')
+    {
+      digitalWrite(INA_WHEEL, HIGH);
+      digitalWrite(INB_WHEEL, HIGH);
+    }
+    else if (dir == 'R')
+    {
+      digitalWrite(INA_WHEEL, LOW);
+      digitalWrite(INB_WHEEL, LOW);
+    }
+    analogWrite(ENA_WHEEL, newspeed);
+    analogWrite(ENB_WHEEL, newspeed);
     break;
   }
 }
