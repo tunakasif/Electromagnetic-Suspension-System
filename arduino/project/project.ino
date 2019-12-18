@@ -29,10 +29,7 @@ char susp_curr_direction_left;
 int susp_curr_speed_right;
 int susp_curr_speed_left;
 // Wheels
-char wheel_curr_direction_right;
-char wheel_curr_direction_left;
-int wheel_curr_speed_right;
-int wheel_curr_speed_left;
+int wheel_speed;
 
 //===============================================================================
 //  Initialization
@@ -68,11 +65,8 @@ void setup()
   susp_curr_speed_right = 0;       // stop
   susp_curr_speed_left = 0;        // stop
 
-  // Default selections for Suspension
-  wheel_curr_direction_right = 'F'; // forward
-  wheel_curr_direction_left = 'F';  // forward
-  wheel_curr_speed_right = 0;       // stop
-  wheel_curr_speed_left = 0;        // stop
+  // Default selections for Wheels
+  wheel_speed = 0;
 
   Serial.begin(9600); // Set comm speed for serial monitor messages and bluetooth
 }
@@ -88,52 +82,137 @@ void loop()
     Serial.println(bluetooth);
   }
 
+  // mode selection
+  if (bluetooth == 'X')
+    suspension_mode = true;
+  else if (bluetooth == 'x')
+    suspension_mode = false;
+
+  // wheel speed selection
   switch (bluetooth)
   {
-  case 'F':
-    // set preference using bluetooth input
-    setDirAndSpeed('F', susp_curr_direction_right, susp_curr_speed_right);
-    setDirAndSpeed('F', susp_curr_direction_left, susp_curr_speed_left);
+  case '0':
+    wheel_speed = 0;
     break;
-  case 'B':
-    // set preference using bluetooth input
-    setDirAndSpeed('B', susp_curr_direction_right, susp_curr_speed_right);
-    setDirAndSpeed('B', susp_curr_direction_left, susp_curr_speed_left);
+  case '1':
+    wheel_speed = 10;
+    break;
+  case '2':
+    wheel_speed = 20;
+    break;
+  case '3':
+    wheel_speed = 30;
+    break;
+  case '4':
+    wheel_speed = 40;
+    break;
+  case '5':
+    wheel_speed = 50;
+    break;
+  case '6':
+    wheel_speed = 60;
+    break;
+  case '7':
+    wheel_speed = 70;
+    break;
+  case '8':
+    wheel_speed = 80;
+    break;
+  case '9':
+    wheel_speed = 90;
+    break;
+  case 'q':
+    wheel_speed = 100;
     break;
 
-  // forward-right & back-right respectively
-  case 'I':
-    setDirAndSpeed('F', susp_curr_direction_right, susp_curr_speed_right);
-    break;
-  case 'J':
-    setDirAndSpeed('B', susp_curr_direction_right, susp_curr_speed_right);
-    break;
-
-  // forward-left & back-left respectively
-  case 'G':
-    setDirAndSpeed('F', susp_curr_direction_left, susp_curr_speed_left);
-  case 'H':
-    setDirAndSpeed('B', susp_curr_direction_left, susp_curr_speed_left);
-    break;
-
-  // stop
-  case 'X':
-  case 'W':
-  case 'w':
-    susp_curr_direction_right = 'F'; // forward
-    susp_curr_speed_right = 0;       // stop
-    susp_curr_direction_left = 'F';  // forward
-    susp_curr_speed_left = 0;        // stop
+  default:
     break;
   }
 
+  if (suspension_mode)
+  {
+    switch (bluetooth)
+    {
+    case 'F':
+      // set preference using bluetooth input
+      setDirAndSpeed('F', susp_curr_direction_right, susp_curr_speed_right);
+      setDirAndSpeed('F', susp_curr_direction_left, susp_curr_speed_left);
+      break;
+    case 'B':
+      // set preference using bluetooth input
+      setDirAndSpeed('B', susp_curr_direction_right, susp_curr_speed_right);
+      setDirAndSpeed('B', susp_curr_direction_left, susp_curr_speed_left);
+      break;
+
+    // forward-right & back-right respectively
+    case 'I':
+      setDirAndSpeed('F', susp_curr_direction_right, susp_curr_speed_right);
+      break;
+    case 'J':
+      setDirAndSpeed('B', susp_curr_direction_right, susp_curr_speed_right);
+      break;
+
+    // forward-left & back-left respectively
+    case 'G':
+      setDirAndSpeed('F', susp_curr_direction_left, susp_curr_speed_left);
+    case 'H':
+      setDirAndSpeed('B', susp_curr_direction_left, susp_curr_speed_left);
+      break;
+
+    // stop
+    case 'W':
+    case 'w':
+      susp_curr_direction_right = 'F'; // forward
+      susp_curr_speed_right = 0;       // stop
+      susp_curr_direction_left = 'F';  // forward
+      susp_curr_speed_left = 0;        // stop
+      break;
+
+    default:
+      break;
+    }
+  }
+
+  else
+  {
+    switch (bluetooth)
+    {
+    case 'S':
+      ShieldMotor('C', 'F', 0);
+      break;
+    case 'F':
+      ShieldMotor('C', 'F', wheel_speed);
+      break;
+    case 'B':
+      ShieldMotor('C', 'R', wheel_speed);
+      break;
+
+    // right, forward-right & back-right respectively
+    case 'R':
+    case 'I':
+      ShieldMotor('A', 'F', wheel_speed);
+      break;
+    case 'J':
+      ShieldMotor('A', 'R', wheel_speed * 8 / 10);
+      break;
+
+    // left, forward-left & back-left respectively
+    case 'L':
+    case 'G':
+      ShieldMotor('B', 'F', wheel_speed);
+      break;
+    case 'H':
+      ShieldMotor('B', 'R', wheel_speed);
+      break;
+
+    default:
+      break;
+    }
+  }
+
   // apply selected state
-  // DriverMotor('A', susp_curr_direction_right, susp_curr_speed_right);
-  // DriverMotor('B', susp_curr_direction_left, susp_curr_speed_left);
-  DriverMotor('A', 'F', 50);
-  DriverMotor('B', 'F', 50);
-  ShieldMotor('A', 'F', 50);
-  ShieldMotor('B', 'F', 50);
+  DriverMotor('A', susp_curr_direction_right, susp_curr_speed_right);
+  DriverMotor('B', susp_curr_direction_left, susp_curr_speed_left);
   delay(10);
 }
 /*
