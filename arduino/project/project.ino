@@ -88,47 +88,6 @@ void loop()
   else if (bluetooth == 'x')
     suspension_mode = false;
 
-  // wheel speed selection
-  switch (bluetooth)
-  {
-  case '0':
-    wheel_speed = 0;
-    break;
-  case '1':
-    wheel_speed = 10;
-    break;
-  case '2':
-    wheel_speed = 20;
-    break;
-  case '3':
-    wheel_speed = 30;
-    break;
-  case '4':
-    wheel_speed = 40;
-    break;
-  case '5':
-    wheel_speed = 50;
-    break;
-  case '6':
-    wheel_speed = 60;
-    break;
-  case '7':
-    wheel_speed = 70;
-    break;
-  case '8':
-    wheel_speed = 80;
-    break;
-  case '9':
-    wheel_speed = 90;
-    break;
-  case 'q':
-    wheel_speed = 100;
-    break;
-
-  default:
-    break;
-  }
-
   if (suspension_mode)
   {
     switch (bluetooth)
@@ -172,10 +131,53 @@ void loop()
     default:
       break;
     }
+    // apply selected state
+    DriverMotor('A', susp_curr_direction_right, susp_curr_speed_right);
+    DriverMotor('B', susp_curr_direction_left, susp_curr_speed_left);
   }
 
   else
   {
+    // wheel speed selection
+    switch (bluetooth)
+    {
+    case '0':
+      wheel_speed = 0;
+      break;
+    case '1':
+      wheel_speed = 10;
+      break;
+    case '2':
+      wheel_speed = 20;
+      break;
+    case '3':
+      wheel_speed = 30;
+      break;
+    case '4':
+      wheel_speed = 40;
+      break;
+    case '5':
+      wheel_speed = 50;
+      break;
+    case '6':
+      wheel_speed = 60;
+      break;
+    case '7':
+      wheel_speed = 70;
+      break;
+    case '8':
+      wheel_speed = 80;
+      break;
+    case '9':
+      wheel_speed = 90;
+      break;
+    case 'q':
+      wheel_speed = 100;
+      break;
+
+    default:
+      break;
+    }
     switch (bluetooth)
     {
     case 'S':
@@ -191,29 +193,25 @@ void loop()
     // right, forward-right & back-right respectively
     case 'R':
     case 'I':
-      ShieldMotor('A', 'F', wheel_speed);
+      ShieldMotor('B', 'F', wheel_speed);
       break;
     case 'J':
-      ShieldMotor('A', 'R', wheel_speed * 8 / 10);
+      ShieldMotor('B', 'R', wheel_speed * 8 / 10);
       break;
 
     // left, forward-left & back-left respectively
     case 'L':
     case 'G':
-      ShieldMotor('B', 'F', wheel_speed);
+      ShieldMotor('A', 'F', wheel_speed);
       break;
     case 'H':
-      ShieldMotor('B', 'R', wheel_speed);
+      ShieldMotor('A', 'R', wheel_speed);
       break;
 
     default:
       break;
     }
   }
-
-  // apply selected state
-  DriverMotor('A', susp_curr_direction_right, susp_curr_speed_right);
-  DriverMotor('B', susp_curr_direction_left, susp_curr_speed_left);
   delay(10);
 }
 /*
