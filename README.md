@@ -38,7 +38,7 @@ pipe <span class="citation" data-cites="emt_textbook">[2]</span>.
 
 <figure>
 <center>
-<img src="proposal/images/suspension.jpeg" alt="Designed Suspension System" id="fig:suspension" style="width:48.0%" /><figcaption>Designed Suspension System<span label="fig:suspension"></span></figcaption>
+<img src="proposal/images/suspension.jpeg" alt="Designed Suspension System" id="fig:suspension" width="250" /><figcaption>Designed Suspension System<span label="fig:suspension"></span></figcaption>
 </center>
 </figure>
 
