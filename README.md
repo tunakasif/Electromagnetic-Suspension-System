@@ -36,10 +36,8 @@ field, the specified design will be able to alter the existing magnetic
 field to change the distance between the two magnets in the suspension
 pipe <span class="citation" data-cites="emt_textbook">[2]</span>.
 
-<figure>
-<center>
-<img src="proposal/images/suspension.jpeg" alt="Designed Suspension System" id="fig:suspension" width="250" /><figcaption>Designed Suspension System<span label="fig:suspension"></span></figcaption>
-</center>
+<figure align="center">
+<img src="proposal/images/suspension.jpeg" alt="Designed Suspension System" id="fig:suspension" width="250" /><figcaption>Fig. 1: Designed Suspension System<span label="fig:suspension"></span></figcaption>
 </figure>
 
 ## PROJECT DESCRIPTION
